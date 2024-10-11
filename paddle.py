@@ -1,5 +1,36 @@
 from turtle import Turtle
 
+
 class Paddle(Turtle):
-    def __init__(self, position):
-        pass
+    def __init__(self, x, y, side):
+        super().__init__()
+
+        # för att få fram x/2 men x/2 gav för inaccurate svar så jag gjorde den här vilket är exakt
+        self.x = float(str(x)[:-1]+"."+str(x)[-1])*5
+        self.y = float(str(y)[:-1]+"."+str(y)[-1])*5
+
+        self.side = side
+        self.shape("square")
+        self.penup()
+        self.shapesize(stretch_len=3, stretch_wid=6)
+        self.color("white")
+        self.speed("fastest")
+        self.new_round()
+
+    def new_round(self):
+        distance_from_edge = self.x-40
+
+        if self.side == "right":
+            # coordinates = (self.x-distance_from_edge, 0)
+            coordinates = (-360, 0)
+            self.left(90)
+
+            # coordinates = (distance_from_edge, 0)
+        elif self.side == "left":
+            # coordinates = (distance_from_edge-self.x, 0)
+            # coordinates = (-distance_from_edge, 0)
+            coordinates = (360, 0)
+            self.left(90)
+
+        self.goto(coordinates)
+        print(self.xcor(), self.ycor())
