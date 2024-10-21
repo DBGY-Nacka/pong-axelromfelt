@@ -1,6 +1,7 @@
 from turtle import Turtle
 
 from random import randint
+from math import cos, sin, acos, asin, tan, atan
 
 
 class Ball(Turtle):
@@ -16,28 +17,50 @@ class Ball(Turtle):
         self.color("white")
         self.speed("fastest")
         self.new_round()
+        self.last_bounce = None
 
     def __str__(self):
         return str((self.heading(), self.xcor(), self.ycor()))
 
     def new_round(self, scoring_side=None):
+        self.last_bounce = None
         self.goto(0, 0)
         if scoring_side is None:
             if randint(1, 2) == 1:
-                # self.setheading(randint(-60, 60))
-                self.setheading(60)
+                self.setheading(randint(-60, 60))
+                # self.setheading(60)
             else:
-                # self.setheading(randint(120, 240))
-                self.setheading(120)
+                self.setheading(randint(120, 240))
+                # self.setheading(120)
+        elif scoring_side == "right":
+            self.setheading(randint(-60, 60))
+        else:
+            self.setheading(randint(120, 240))
 
-    def bounce(self):
-        self.setheading(-self.heading())
+    def bounce_wall(self):
+        print("wall")
+        self.setheading(360-self.heading())
+
+    def bounce_paddle(self):
+        print("paddle")
+        if self.xcor() > 0:
+
+            self.setheading(180-self.heading()+randint(-40, 40))
+            if self.heading() > 240 or self.heading() < 120:
+                self.setheading(randint(135, 225))
+
+            self.last_bounce = "right"
+        else:
+
+            self.setheading(180-self.heading()+randint(-40, 40))
+            if self.heading() > 60 and self.heading() < 300:
+                self.setheading(randint(45, 315))
+            self.last_bounce = "left"
 
     def move(self):
-        self.forward(10)
-        if self.ycor() > self.y or self.ycor() < -self.y:
-            print("bounced")
-            self.bounce()
+        self.forward(2)
+        if abs(self.ycor()) > self.y:
+            self.bounce_wall()
 
     def round_over(self):
         if self.xcor() > self.x:

@@ -14,7 +14,9 @@ y = float(str(SCREEN_HEIGHT)[:-1]+"."+str(SCREEN_HEIGHT)[-1])*5
 screen = Screen()
 screen.bgcolor("grey")
 screen.title("ponge")
-screen.setworldcoordinates(-x, -y, x, y)
+
+screen.setworldcoordinates(-x+10, -y, x, y)
+
 left = Turtle()
 right = Turtle()
 
