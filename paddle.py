@@ -33,9 +33,12 @@ class Paddle(Turtle):
         self.goto(coordinates)
 
     def up(self):
-        self.setheading(90)
-        self.forward(1.5)
+
+        if self.ycor() < self.y-20:
+            self.setheading(90)
+            self.forward(1.5)
 
     def down(self):
-        self.setheading(270)
-        self.forward(1.5)
+        if self.ycor() > 20-self.y:
+            self.setheading(270)
+            self.forward(1.5)
