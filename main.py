@@ -4,6 +4,8 @@ from ball import Ball
 from scoreboard import Scoreboard
 from time import sleep
 from turtle import Turtle
+from gamemode import Gamemode
+from pause import Pause
 # din screen bör vara rektanguljär, ex. 800x600
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
@@ -74,17 +76,19 @@ def release_down():
 
 
 def main():
-    game_on = True
+    pause = Pause()
+    scoreboard = Scoreboard(screen)
+
     ball = Ball(x=SCREEN_WIDTH, y=SCREEN_HEIGHT)
     right_paddle = Paddle(x=SCREEN_WIDTH, y=SCREEN_HEIGHT, side="right")
     left_paddle = Paddle(x=SCREEN_WIDTH, y=SCREEN_HEIGHT, side="left")
-    player1 = ""
-    player2 = ""
-    while player1 == "":
-        player1 = textinput("Pick name", "Left player name")
-    while player2 == "":
-        player2 = textinput("Pick name", "Right player name")
-    scoreboard = Scoreboard(player1, player2)
+
+    while scoreboard.left_name == "":
+        scoreboard.left_name = textinput("Pick name", "Left player name")
+    while scoreboard.right_name == "":
+        scoreboard.right_name = textinput("Pick name", "Right player name")
+
+    gamemode = Gamemode()
 
     screen.listen()
     screen.onkeypress(press_up, "Up")
@@ -97,28 +101,96 @@ def main():
     screen.onkeyrelease(release_w, "w")
     screen.onkeyrelease(release_s, "s")
 
-    scoreboard.new_round(screen)
+    screen.onkey(pause.update_state, "p")
+    screen.onkey(gamemode.end, "k")
 
-    while game_on:
-        move_players(left_paddle, right_paddle)
+    run_game = True
+
+    while run_game:
+        screen.listen()
+
+        scoreboard.display_time(gamemode.return_time())
+        gamemode.new_round()
+        scoreboard.new_round(screen, new_game=True)
+        left_paddle.new_round()
+        right_paddle.new_round()
+        ball.new_round(None)
+
+        game_on = True
+
+        while game_on:
+            sleep(0.005)
+            screen.update()
+
+            if not pause.state:
+                move_players(left_paddle, right_paddle)
+                ball.move()
+                if ball.distance(left_paddle) < 76:
+                    if ball.last_bounce != "left":
+                        if ball.xcor() < left_paddle.xcor()+20 and ball.xcor() > left_paddle.xcor():
+                            ball.bounce_paddle()
+                elif ball.distance(right_paddle) < 76:
+                    if ball.last_bounce != "right":
+                        if ball.xcor() > right_paddle.xcor()-20 and ball.xcor() < right_paddle.xcor():
+                            ball.bounce_paddle()
+
+                round_status = ball.round_over()
+
+                if round_status is not None:
+                    scoreboard.increase_score(round_status)
+                    game_on = gamemode.game_status(
+                        scoreboard.left_score, scoreboard.right_score)
+                    if game_on:
+                        gamemode.new_round()
+
+                        left_paddle.new_round()
+                        right_paddle.new_round()
+
+                        ball.new_round(round_status)
+
+                        scoreboard.new_round(screen)
+
+                scoreboard.display_time(gamemode.return_time())
+                if gamemode.time or gamemode.end_early:
+                    game_on = gamemode.game_status()
+            else:
+                gamemode.fix_time_paused()
+
+        scoreboard.game_over()
         screen.update()
-        sleep(0.002)
-        ball.move()
-        if ball.distance(left_paddle) < 76 and ball.xcor() < left_paddle.xcor()+20 and ball.last_bounce != "left" and ball.xcor() > left_paddle.xcor() or ball.distance(right_paddle) < 76 and ball.xcor() > right_paddle.xcor()-20 and ball.last_bounce != "right" and ball.xcor() < right_paddle.xcor():
-            ball.bounce_paddle()
 
-        round_status = ball.round_over()
+        sleep(2)
+        continue_game = ["r", "replay"]
+        change_players = ["n"]
+        change_gamemode = ["g", "gamemode"]
+        quit_game = ["q", "quit"]
+        while True:
+            player_choice = ""
 
-        if round_status is not None:
-            scoreboard.increase_score(round_status)
+            while player_choice not in [*continue_game, *change_players, *change_gamemode, *quit_game]:
+                try:
+                    player_choice = textinput(
+                        "gmae", "Replay(r), change gamemode(g), change players(n) or quit(q)").lower()
+                except Exception:
+                    pass
 
-            # if not infinit_mode:
+            if player_choice in [*continue_game, *quit_game]:
+                if player_choice in quit_game:
+                    run_game = False
+                break
 
-            # else:
-            left_paddle.new_round()
-            right_paddle.new_round()
-            ball.new_round(round_status)
-            scoreboard.new_round(screen)
+            elif player_choice in change_gamemode:
+                gamemode.pick_gamemode()
+
+            elif player_choice in change_players:
+                player1 = ""
+                player2 = ""
+                while player1 == "":
+                    player1 = textinput("Pick name", "Left player name")
+                while player2 == "":
+                    player2 = textinput("Pick name", "Right player name")
+                scoreboard.left_name = player1
+                scoreboard.right_name = player2
 
 
 if __name__ == "__main__":

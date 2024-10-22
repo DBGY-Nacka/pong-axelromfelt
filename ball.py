@@ -19,9 +19,6 @@ class Ball(Turtle):
         self.new_round()
         self.last_bounce = None
 
-    def __str__(self):
-        return str((self.heading(), self.xcor(), self.ycor()))
-
     def new_round(self, scoring_side=None):
         self.last_bounce = None
         self.goto(0, 0)
@@ -63,7 +60,7 @@ class Ball(Turtle):
         print(self.heading())
 
     def move(self):
-        self.forward(2)
+        self.forward(5)
         if abs(self.ycor()) > self.y:
             self.bounce_wall()
 

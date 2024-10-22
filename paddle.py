@@ -36,9 +36,9 @@ class Paddle(Turtle):
 
         if self.ycor() < self.y-20:
             self.setheading(90)
-            self.forward(1.5)
+            self.forward(3)
 
     def down(self):
         if self.ycor() > 20-self.y:
             self.setheading(270)
-            self.forward(1.5)
+            self.forward(3)

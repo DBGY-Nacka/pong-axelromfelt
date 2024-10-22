@@ -1,19 +1,28 @@
-from turtle import textinput, numinput
+from turtle import Turtle, textinput, numinput
 from datetime import datetime as Time, timedelta as td
 from time import sleep
 
 
-def time_diff(start_time, end_time):
+def time_diff(start_time, end_time, display=False, paused=False):
     # start_time = datetime.strptime(start_time, "%H:%M:%S")
     # end_time = datetime.strptime(end_time, "%H:%M:%S")
     time_diff_res = end_time - start_time
 
-    days = time_diff_res.days
-    hours = time_diff_res.seconds // 3600
     minutes = (time_diff_res.seconds // 60) % 60
     seconds = time_diff_res.seconds % 60
+    microseconds = time_diff_res.microseconds
+    if display:
+        if len(str(minutes)) == 1:
+            minutes = f"0{minutes}"
+        if len(str(seconds)) == 1:
+            seconds = f"0{seconds}"
+        return f"{minutes}:{seconds}"
 
-    return [time_diff_res, minutes, seconds]
+    elif paused:
+        return (minutes, seconds)
+
+    else:
+        return f"{minutes}{seconds}{str(microseconds)[0]}"
 
 
 class Gamemode():
@@ -21,20 +30,33 @@ class Gamemode():
         self.time = False
         self.score = False
         self.infinit = False
+        self.time_offset = None
+        self.end_early = False
         self.pick_gamemode()
         self.new_game()
 
     def new_game(self):
         if self.time:
-            self.time_var = Time.now()+td(minutes=(self.end_time))
+            self.time_var = Time.now()+td(minutes=(self.end_time), milliseconds=3)
         else:
             self.time_var = Time.now()
 
     def new_round(self):
+        self.time_var += td(seconds=4)
+
+    def game_status(self, left_score=None, right_score=None):
+        self.time_offset = None
+
         if self.time:
-            self.time_var += td(seconds=4)
-        else:
-            self.time_var -= td(seconds=4)
+            if time_diff(Time.now(), self.time_var) == "001":
+                return False
+        elif self.score:
+            if left_score == self.win_score or right_score == self.win_score:
+                return False
+        elif self.end_early:
+            self.end_early = False
+            return False
+        return True
 
     def pick_gamemode(self):
         self.time = False
@@ -47,7 +69,7 @@ class Gamemode():
         player_choice = ""
         while player_choice not in [*time_mode, *score_mode, *infinit_mode]:
             player_choice = textinput(
-                "Pick gamemode", "Time or score based or infinit").lower()
+                "Pick gamemode", "Time(t) or score(s) based or infinit(i)").lower()
 
         if player_choice in time_mode:
             self.time = True
@@ -68,7 +90,7 @@ class Gamemode():
 
         elif self.score:
             self.win_score = 0
-            while self.win_score > 0:
+            while self.win_score <= 0:
                 try:
                     self.win_score = int(
                         numinput("Pick score", "Score to win"))
@@ -77,17 +99,23 @@ class Gamemode():
 
     def return_time(self):
         if self.time:
-            return self.time_var-Time.now()
+            return time_diff(Time.now(), self.time_var, True)
+        return time_diff(self.time_var, Time.now(), True)
 
+    def fix_time_paused(self):
 
-t = Time.now()
-t2 = t+td(minutes=(5))
-t3 = t+td(minutes=2, seconds=3)
+        if self.time:
+            if self.time_offset is None:
+                self.time_offset = self.time_var-Time.now()
 
-t4 = Time.now()
-t5 = Time.now()+td(minutes=time_diff(t3, t2)[1], seconds=time_diff(t3, t2)[2])
+            self.time_var = Time.now()+self.time_offset
 
-print(t.strftime("%H:%M:%S"), time_diff(t3, t2)[0], t5.strftime("%H:%M:%S"))
+        else:
+            if self.time_offset is None:
+                self.time_offset = Time.now()-self.time_var
+                print(self.time_offset)
 
-# print((t3).total_seconds())
-print(t.strftime("%H:%M"), t2.strftime("%H:%M"))
+            self.time_var = Time.now()-self.time_offset
+
+    def end(self):
+        self.end_early = True
