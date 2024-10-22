@@ -1,4 +1,4 @@
-from turtle import Screen
+from turtle import Screen, textinput, numinput
 from paddle import Paddle
 from ball import Ball
 from scoreboard import Scoreboard
@@ -16,7 +16,7 @@ x = float(str(SCREEN_WIDTH)[:-1]+"."+str(SCREEN_WIDTH)[-1])*5
 y = float(str(SCREEN_HEIGHT)[:-1]+"."+str(SCREEN_HEIGHT)[-1])*5
 screen.setworldcoordinates(-x+10, -y, x, y)
 screen.bgcolor("black")
-screen.title("ponge")
+screen.title("pong")
 
 screen.tracer(0)
 
@@ -78,7 +78,13 @@ def main():
     ball = Ball(x=SCREEN_WIDTH, y=SCREEN_HEIGHT)
     right_paddle = Paddle(x=SCREEN_WIDTH, y=SCREEN_HEIGHT, side="right")
     left_paddle = Paddle(x=SCREEN_WIDTH, y=SCREEN_HEIGHT, side="left")
-    scoreboard = Scoreboard()
+    player1 = ""
+    player2 = ""
+    while player1 == "":
+        player1 = textinput("Pick name", "Left player name")
+    while player2 == "":
+        player2 = textinput("Pick name", "Right player name")
+    scoreboard = Scoreboard(player1, player2)
 
     screen.listen()
     screen.onkeypress(press_up, "Up")
@@ -91,21 +97,28 @@ def main():
     screen.onkeyrelease(release_w, "w")
     screen.onkeyrelease(release_s, "s")
 
+    scoreboard.new_round(screen)
+
     while game_on:
         move_players(left_paddle, right_paddle)
         screen.update()
         sleep(0.002)
         ball.move()
-        if ball.distance(left_paddle) < 76 and ball.xcor() < left_paddle.xcor()+20 and ball.last_bounce != "left" or ball.distance(right_paddle) < 76 and ball.xcor() > right_paddle.xcor()-20 and ball.last_bounce != "right":
+        if ball.distance(left_paddle) < 76 and ball.xcor() < left_paddle.xcor()+20 and ball.last_bounce != "left" and ball.xcor() > left_paddle.xcor() or ball.distance(right_paddle) < 76 and ball.xcor() > right_paddle.xcor()-20 and ball.last_bounce != "right" and ball.xcor() < right_paddle.xcor():
             ball.bounce_paddle()
 
         round_status = ball.round_over()
 
         if round_status is not None:
+            scoreboard.increase_score(round_status)
+
+            # if not infinit_mode:
+
+            # else:
             left_paddle.new_round()
             right_paddle.new_round()
             ball.new_round(round_status)
-            scoreboard.increase_score(round_status)
+            scoreboard.new_round(screen)
 
 
 if __name__ == "__main__":
