@@ -35,12 +35,9 @@ class Ball(Turtle):
             self.setheading(randint(120, 240))
 
     def bounce_wall(self):
-        print("wall")
         self.setheading(360-self.heading())
 
     def bounce_paddle(self):
-        print("paddle")
-        print(self.heading())
 
         if self.xcor() > 0:
 
@@ -57,7 +54,6 @@ class Ball(Turtle):
                 else:
                     self.setheading(randint(315, 360))
             self.last_bounce = "left"
-        print(self.heading())
 
     def move(self):
         self.forward(5)

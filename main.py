@@ -6,6 +6,7 @@ from time import sleep
 from turtle import Turtle
 from gamemode import Gamemode
 from pause import Pause
+from datetime import datetime as Time
 # din screen bör vara rektanguljär, ex. 800x600
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
@@ -76,6 +77,7 @@ def release_down():
 
 
 def main():
+    time = None
     pause = Pause()
     scoreboard = Scoreboard(screen)
 
@@ -149,8 +151,11 @@ def main():
                         ball.new_round(round_status)
 
                         scoreboard.new_round(screen)
+                new_time = Time.now().strftime("%S")
+                if new_time != time:
+                    time = new_time
+                    scoreboard.display_time(gamemode.return_time())
 
-                scoreboard.display_time(gamemode.return_time())
                 if gamemode.time or gamemode.end_early:
                     game_on = gamemode.game_status()
             else:

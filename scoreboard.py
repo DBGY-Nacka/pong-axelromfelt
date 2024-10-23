@@ -11,7 +11,7 @@ class Scoreboard(Turtle):
 
     def __init__(self, screen):
         super().__init__()
-        self.time = "0:0"
+        self.time_text = "0:0"
         self.left_name = ""
         self.right_name = ""
         self.left_score = 0
@@ -53,7 +53,7 @@ class Scoreboard(Turtle):
         self.write(self.right_name, align=ALIGNMENT, font=FONT_NAME)
 
         self.goto(0, 200)
-        self.write(self.time, align=ALIGNMENT, font=FONT)
+        self.write(self.time_text, align=ALIGNMENT, font=FONT)
 
         if game_over:
             self.goto(0, 0)
@@ -67,10 +67,8 @@ class Scoreboard(Turtle):
                            align=ALIGNMENT, font=FONT_WIN)
 
     def display_time(self, new_time):
-        if new_time != self.time:
-            self.time = new_time
-            print(new_time)
-            self.update_scoreboard()
+        self.time_text = new_time
+        self.update_scoreboard()
 
     def game_over(self):
         self.update_scoreboard(game_over=True)

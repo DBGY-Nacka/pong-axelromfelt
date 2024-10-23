@@ -113,7 +113,6 @@ class Gamemode():
         else:
             if self.time_offset is None:
                 self.time_offset = Time.now()-self.time_var
-                print(self.time_offset)
 
             self.time_var = Time.now()-self.time_offset
 
